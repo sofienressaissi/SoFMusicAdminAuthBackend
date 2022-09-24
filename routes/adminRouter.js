@@ -84,6 +84,26 @@ router.post("/login", async (req, res) => {
     }
 })
 
+router.post("/tokenIsValid", async (req, res) => {
+    try {
+        const token = req.header("x-auth-token");
+        if (!token) {
+            return res.json(false);
+        }
+        const verified = jwt.verify(token, process.env.JWT_ADMIN_SM);
+        if (!verified) {
+            return res.json(false);
+        }
+        const adminAuth = await admin.findById(verified.id);
+        if (!adminAuth) {
+            return res.json(false);
+        }
+        return res.json(true);
+    } catch (err) {
+        res.status(500).json(err.message);
+    }
+})
+
 router.get("/", authAdmin, async (req, res) => {
     const adminn = await admin.findById(req.admin);
     res.json({
